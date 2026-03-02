@@ -1,0 +1,224 @@
+/* CallFloor page styles */
+.call-grid {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 12px;
+}
+
+@media (max-width: 900px) {
+    .call-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+/* ===== Floor Button ===== */
+.floor-btn {
+    background: var(--panel-2);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 18px 8px;
+    text-align: center;
+    cursor: pointer;
+    position: relative;
+    color: var(--text);
+    transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+}
+
+.floor-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 28px rgba(87, 201, 255, 0.15);
+    border-color: rgba(87, 201, 255, 0.3);
+}
+
+.floor-btn:active,
+.floor-btn.pressing {
+    transform: scale(0.92);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) inset;
+    transition: transform 0.08s ease;
+}
+
+.floor-btn.selected {
+    background: linear-gradient(135deg, rgba(43, 210, 182, 0.3), rgba(87, 201, 255, 0.2));
+    border-color: rgba(43, 210, 182, 0.6);
+    box-shadow: 0 8px 24px rgba(43, 210, 182, 0.25);
+}
+
+.floor-btn.locked {
+    background: var(--panel-3);
+    border-style: dashed;
+    color: rgba(232, 238, 246, 0.5);
+}
+
+.floor-btn.locked:hover {
+    border-color: rgba(255, 184, 92, 0.4);
+    box-shadow: 0 8px 20px rgba(255, 184, 92, 0.1);
+}
+
+.floor-num {
+    font-weight: 800;
+    font-size: 22px;
+}
+
+.lock-label {
+    font-size: 10px;
+    color: var(--warn);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.selected-label {
+    font-size: 10px;
+    color: var(--accent);
+    font-weight: 700;
+}
+
+/* ===== Auth Panel ===== */
+.auth-panel {
+    margin-top: 16px;
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.auth-card {
+    flex: 1;
+    min-width: 200px;
+    background: var(--panel-2);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 14px;
+}
+
+.auth-card h3 {
+    margin: 0 0 8px;
+    font-size: 14px;
+}
+
+/* ===== PIN Modal ===== */
+.pin-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(8px);
+    display: grid;
+    place-items: center;
+    z-index: 1000;
+    animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.pin-modal {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    padding: 28px 24px;
+    width: 320px;
+    text-align: center;
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5);
+    animation: modalSlideUp 0.25s ease;
+}
+
+@keyframes modalSlideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.pin-modal h3 {
+    margin: 0 0 4px;
+    font-size: 16px;
+}
+
+.pin-dots {
+    display: flex;
+    gap: 14px;
+    justify-content: center;
+    margin: 20px 0 10px;
+}
+
+.pin-dot {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 2px solid rgba(87, 201, 255, 0.4);
+    background: transparent;
+    transition: 0.2s ease;
+}
+
+.pin-dot.filled {
+    background: var(--accent-2);
+    border-color: var(--accent-2);
+    box-shadow: 0 0 10px rgba(87, 201, 255, 0.4);
+}
+
+.pin-error {
+    color: var(--danger);
+    font-size: 12px;
+    margin-bottom: 6px;
+}
+
+.pin-pad {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin: 12px 0;
+}
+
+.pin-key {
+    width: 100%;
+    height: 52px;
+    border-radius: 14px;
+    border: 1px solid var(--line);
+    background: var(--panel-2);
+    color: var(--text);
+    font-size: 20px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.15s ease;
+}
+
+.pin-key:hover:not(.empty) {
+    background: rgba(87, 201, 255, 0.12);
+    border-color: rgba(87, 201, 255, 0.3);
+}
+
+.pin-key:active:not(.empty) {
+    transform: scale(0.92);
+}
+
+.pin-key.empty {
+    visibility: hidden;
+}
+
+.pin-key.del {
+    font-size: 18px;
+}
+
+.pin-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 6px;
+}
+
+.pin-actions .btn {
+    flex: 1;
+}

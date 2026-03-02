@@ -1,0 +1,172 @@
+/* SOS page styles */
+.sos-wrap {
+    display: grid;
+    grid-template-columns: 1.1fr 0.9fr;
+    gap: 16px;
+}
+
+@media (max-width: 900px) {
+    .sos-wrap {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ===== Slide to Call ===== */
+.slide-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 220px;
+    gap: 12px;
+}
+
+.slide-label {
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--danger);
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+}
+
+.slide-track {
+    width: 100%;
+    max-width: 360px;
+    height: 56px;
+    border-radius: 28px;
+    background: linear-gradient(90deg, rgba(255, 107, 107, 0.15), rgba(255, 184, 92, 0.1));
+    border: 2px solid rgba(255, 107, 107, 0.3);
+    position: relative;
+    overflow: hidden;
+    user-select: none;
+    touch-action: none;
+}
+
+.slide-fill {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, rgba(255, 107, 107, 0.35), rgba(255, 184, 92, 0.25));
+    border-radius: 28px;
+    transition: none;
+}
+
+.slide-thumb {
+    position: absolute;
+    top: 2px;
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #ff6b6b, #ffb85c);
+    display: grid;
+    place-items: center;
+    font-size: 22px;
+    cursor: grab;
+    box-shadow: 0 8px 24px rgba(255, 107, 107, 0.4);
+    transition: none;
+    z-index: 2;
+}
+
+.slide-thumb:active {
+    cursor: grabbing;
+    transform: scale(1.05);
+}
+
+/* ===== Calling State ===== */
+.sos-calling {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 220px;
+    gap: 12px;
+    text-align: center;
+    position: relative;
+}
+
+.sos-calling-icon {
+    font-size: 48px;
+    animation: callingPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes callingPulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.15);
+    }
+}
+
+.sos-calling-status {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--warn);
+    max-width: 300px;
+    line-height: 1.4;
+}
+
+.sos-pulse-ring {
+    position: absolute;
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 184, 92, 0.3);
+    animation: pulseRing 2s ease-out infinite;
+    pointer-events: none;
+    top: 30px;
+}
+
+@keyframes pulseRing {
+    0% {
+        transform: scale(0.8);
+        opacity: 1;
+    }
+
+    100% {
+        transform: scale(2);
+        opacity: 0;
+    }
+}
+
+/* ===== SIM Module ===== */
+.sim-module {
+    margin-top: 4px;
+    padding: 10px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--line);
+}
+
+.sim-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.sim-signal {
+    display: flex;
+    align-items: flex-end;
+    gap: 2px;
+    height: 24px;
+}
+
+.signal-bar {
+    width: 4px;
+    border-radius: 2px;
+    background: rgba(255, 255, 255, 0.15);
+    transition: 0.2s;
+}
+
+.signal-bar.active {
+    background: #2bd2b6;
+}
+
+.sim-carrier {
+    font-weight: 700;
+    font-size: 13px;
+}

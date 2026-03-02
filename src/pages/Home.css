@@ -1,0 +1,38 @@
+/* Home page specific styles */
+.status-grid {
+    display: grid;
+    grid-template-columns: 1.1fr 0.9fr;
+    gap: 16px;
+    align-items: stretch;
+}
+
+@media (max-width: 720px) {
+    .status-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.floor-card {
+    background: linear-gradient(135deg, rgba(87, 201, 255, 0.18), rgba(43, 210, 182, 0.12));
+    border: 1px solid rgba(87, 201, 255, 0.24);
+    border-radius: 16px;
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    min-height: 220px;
+}
+
+.floor-card .label {
+    color: var(--muted);
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.floor-display {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
