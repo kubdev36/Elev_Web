@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import useElevatorStatus from '../hooks/useElevatorStatus';
 import BotOrb from '../components/BotOrb';
 import { useToast } from '../components/Toast';
+import useWeather from '../hooks/useWeather';
 import api from '../services/api';
 import { speak, startWakeWordListener } from '../services/speech';
 import './Home.css';
@@ -10,6 +11,7 @@ import './Home.css';
 export default function Home() {
     const status = useElevatorStatus();
     const showToast = useToast();
+    const weather = useWeather();
     const navigate = useNavigate();
 
     const [botMode, setBotMode] = useState('idle');
@@ -45,6 +47,9 @@ export default function Home() {
         return 'Đứng';
     };
 
+    // Start is G (floor 1), others are numbers
+    const displayFloor = status.floor == 1 ? 'G' : status.floor;
+
     return (
         <div>
             <div className="page-title">
@@ -58,7 +63,7 @@ export default function Home() {
                         <div className="floor-card">
                             <div className="label">Tầng hiện tại</div>
                             <div className="floor-display">
-                                <div className="floorNum">{status.floor ?? '--'}</div>
+                                <div className="floorNum">{displayFloor ?? '--'}</div>
                                 <div className={`badge ${status.overload ? 'err' : 'ok'}`}>
                                     {status.overload ? 'QUÁ TẢI' : 'Bình thường'}
                                 </div>
@@ -88,7 +93,7 @@ export default function Home() {
                             </div>
                             <div className="tile">
                                 <div className="k">Thời tiết</div>
-                                <div className="v">{status.weather ?? '--'}</div>
+                                <div className="v">{weather}</div>
                             </div>
                             <button className="btn btn-primary" onClick={() => navigate('/call')}>
                                 Gọi tầng

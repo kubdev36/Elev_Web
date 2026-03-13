@@ -35,6 +35,13 @@ export default function Assistant() {
             abortRef.current = null;
         }
 
+        // Local Sync Parser: Check if user is asking to go to a floor
+        const floorMatch = text.match(/(?:tầng|lên|xuống)\s*(\d+)/i);
+        if (floorMatch) {
+            const f = parseInt(floorMatch[1]);
+            if (f >= 1 && f <= 15) localStorage.setItem('lift_target', f);
+        }
+
         addMessage(text, 'user');
         setInput('');
         setBusy(true);

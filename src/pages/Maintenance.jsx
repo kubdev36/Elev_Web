@@ -52,6 +52,8 @@ export default function Maintenance() {
     const [authed, setAuthed] = useState(() => localStorage.getItem('maint_authed') === '1');
     const [empCode, setEmpCode] = useState('');
     const [mssv, setMssv] = useState('');
+    const [sqlQuery, setSqlQuery] = useState('SELECT * FROM maintenance_logs LIMIT 10;');
+    const [sqlResult, setSqlResult] = useState(null);
     const [llmInput, setLlmInput] = useState('');
     const [llmOutput, setLlmOutput] = useState('Kết quả sẽ hiển thị ở đây.');
     const [lookupTab, setLookupTab] = useState('employees');
@@ -65,6 +67,9 @@ export default function Maintenance() {
     });
     const [floorPins, setFloorPins] = useState(() => {
         try { return JSON.parse(localStorage.getItem('floor_pins') || '{}'); } catch { return {}; }
+    });
+    const [floorAuthConfig, setFloorAuthConfig] = useState(() => {
+        try { return JSON.parse(localStorage.getItem('floor_auth_config') || '{}'); } catch { return {}; }
     });
     const [editingPin, setEditingPin] = useState(null);
     const [pinInput, setPinInput] = useState('');
@@ -137,6 +142,13 @@ export default function Maintenance() {
         }, 700);
     };
 
+    const runSqlQuery = () => {
+        setSqlResult('Đang thực thi...');
+        setTimeout(() => {
+            setSqlResult('Query OK. 10 rows returned (0.04 sec). [Mô phỏng dữ liệu]');
+        }, 600);
+    };
+
     const toggleFloorLock = (floor) => {
         setLockedFloors(prev => {
             const next = prev.includes(floor) ? prev.filter(f => f !== floor) : [...prev, floor];
@@ -165,6 +177,18 @@ export default function Maintenance() {
         setFloorPins(next);
         localStorage.setItem('floor_pins', JSON.stringify(next));
         showToast(`Đã xóa PIN tầng ${floor}`);
+    };
+
+    const toggleAuthType = (floor, type) => {
+        setFloorAuthConfig(prev => {
+            const floorCfg = prev[floor] || { pin: true, face: false };
+            const newFloorCfg = { ...floorCfg, [type]: !floorCfg[type] };
+            // Ensure at least one is selected if locked
+            if (!newFloorCfg.pin && !newFloorCfg.face) return prev;
+            const next = { ...prev, [floor]: newFloorCfg };
+            localStorage.setItem('floor_auth_config', JSON.stringify(next));
+            return next;
+        });
     };
 
     const dir = status.direction || '--';
@@ -258,32 +282,43 @@ export default function Maintenance() {
             </div>
 
             {/* Timeline */}
-            <div className="card" style={{ marginTop: 14 }}>
-                <h3>Timeline sự kiện</h3>
-                <table className="table">
-                    <thead>
-                        <tr>
-                            <th>Thời gian</th>
-                            <th>Sự kiện</th>
-                            <th>Mức độ</th>
-                            <th>Độ tin cậy</th>
-                            <th>Thang/Tầng</th>
-                            <th>Hành động</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {EVENTS.map((e, i) => (
-                            <tr key={i}>
-                                <td>{e.time}</td>
-                                <td>{e.event}</td>
-                                <td><span className={`event-badge ${e.type}`}>{e.type === 'error' ? 'LỖI' : e.type === 'warn' ? 'CẢNH BÁO' : 'THÔNG BÁO'}</span></td>
-                                <td>{e.conf.toFixed(2)}</td>
-                                <td>{e.loc}</td>
-                                <td><button className="btn btn-ghost btn-sm" onClick={() => showToast(`Chi tiết: ${e.event}`)}>Xem</button></td>
+            <div style={{ marginTop: 14, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+                <div className="card">
+                    <h3>Timeline sự kiện</h3>
+                    <table className="table">
+                        <thead>
+                            <tr>
+                                <th>Giờ</th>
+                                <th>Sự kiện</th>
+                                <th>Mức độ</th>
+                                <th>Vị trí</th>
                             </tr>
-                        ))}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            {EVENTS.map((e, i) => (
+                                <tr key={i}>
+                                    <td>{e.time}</td>
+                                    <td>{e.event}</td>
+                                    <td><span className={`event-badge ${e.type}`}>{e.type === 'error' ? 'LỖI' : e.type === 'warn' ? 'WARN' : 'INFO'}</span></td>
+                                    <td>{e.loc.split('/')[1]}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+
+                {/* LLM Console moved here */}
+                <div className="card">
+                    <h3>Trợ lý bảo trì (LLM)</h3>
+                    <div className="muted" style={{ marginBottom: 8 }}>Hỏi hệ thống AI về dữ liệu bảo trì và phân tích.</div>
+                    <div style={{ background: '#f5f5f5', padding: 10, borderRadius: 4, minHeight: 120, marginBottom: 10, fontSize: 13, whiteSpace: 'pre-wrap' }}>
+                        {llmOutput}
+                    </div>
+                    <div className="inline">
+                        <input style={{ flex: 1 }} value={llmInput} onChange={e => setLlmInput(e.target.value)} placeholder="VD: Lỗi nào nhiều nhất?" onKeyDown={e => e.key === 'Enter' && runLLMQuery()} />
+                        <button className="btn btn-primary" onClick={runLLMQuery}>Gửi</button>
+                    </div>
+                </div>
             </div>
 
             {/* Row 2: Lookup + LLM + Lock */}
@@ -355,13 +390,16 @@ export default function Maintenance() {
                     </div>
                 </div>
 
-                {/* LLM Console */}
+                {/* MySQL Manager replacing old LLM Console */}
                 <div className="card">
-                    <h3>LLM Console</h3>
-                    <div className="muted" style={{ marginBottom: 8 }}>Hỏi hệ thống AI về dữ liệu bảo trì và phân tích.</div>
-                    <input value={llmInput} onChange={e => setLlmInput(e.target.value)} placeholder="VD: Lỗi nào xảy ra nhiều nhất tuần qua?" onKeyDown={e => e.key === 'Enter' && runLLMQuery()} />
-                    <button className="btn btn-primary" style={{ marginTop: 8, width: '100%' }} onClick={runLLMQuery}>Truy vấn</button>
-                    <div className="llm-output">{llmOutput}</div>
+                    <h3>Quản lý Database (MySQL)</h3>
+                    <div className="muted" style={{ marginBottom: 8 }}>Truy vấn trực tiếp CSDL hệ thống.</div>
+                    <textarea 
+                        style={{ width: '100%', height: 80, fontFamily: 'monospace', padding: 8, marginBottom: 8 }} 
+                        value={sqlQuery} onChange={e => setSqlQuery(e.target.value)} 
+                    />
+                    <button className="btn btn-primary" style={{ width: '100%' }} onClick={runSqlQuery}>Execute SQL</button>
+                    {sqlResult && <div className="llm-output" style={{ marginTop: 8, fontFamily: 'monospace' }}>{sqlResult}</div>}
                 </div>
 
                 {/* System Config */}
@@ -385,7 +423,7 @@ export default function Maintenance() {
             {/* Elevator Lock Management */}
             <div className="card" style={{ marginTop: 14 }}>
                 <h3>Quản lý khóa tầng</h3>
-                <div className="muted" style={{ marginBottom: 10 }}>Bấm để khóa/mở khóa từng tầng. Đặt PIN 4 số để người dùng có thể mở khóa.</div>
+                <div className="muted" style={{ marginBottom: 10 }}>Bấm để khóa/mở khóa. Cài đặt phương thức xác thực (PIN, FaceID).</div>
                 <div className="lock-grid">
                     {ALL_FLOORS.map(f => (
                         <div key={f} className="lock-item">
@@ -397,7 +435,14 @@ export default function Maintenance() {
                                 <span className="lock-icon">{lockedFloors.includes(f) ? '🔒' : '🔓'}</span>
                             </button>
                             {lockedFloors.includes(f) && (
-                                <div className="pin-set">
+                                <div style={{ marginTop: 6, display: 'flex', flexDirection: 'column', gap: 4 }}>
+                                    <div className="inline" style={{ fontSize: 11 }}>
+                                        <label><input type="checkbox" checked={floorAuthConfig[f]?.pin ?? true} onChange={() => toggleAuthType(f, 'pin')} /> PIN</label>
+                                        <label><input type="checkbox" checked={floorAuthConfig[f]?.face ?? false} onChange={() => toggleAuthType(f, 'face')} /> Face</label>
+                                    </div>
+                                    
+                                    {(floorAuthConfig[f]?.pin ?? true) && (
+                                    <div className="pin-set">
                                     {editingPin === f ? (
                                         <div className="pin-edit-row">
                                             <input
@@ -422,6 +467,8 @@ export default function Maintenance() {
                                                 <button className="btn btn-ghost btn-xs" onClick={() => { setEditingPin(f); setPinInput(''); }}>Đặt PIN</button>
                                             )}
                                         </div>
+                                    )}
+                                    </div>
                                     )}
                                 </div>
                             )}
